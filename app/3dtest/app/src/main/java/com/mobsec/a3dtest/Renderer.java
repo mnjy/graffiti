@@ -45,7 +45,10 @@ public class Renderer extends RajawaliRenderer {
         material.setColor(0);
 
         Texture earthTexture = new Texture("Earth", R.drawable.earthtruecolor_nasa_big);
-        mybmp = DownloadImage.get("http://www.clintonmedbery.com/wp-content/uploads/2015/04/earthtruecolor_nasa_big.jpg");
+
+        String qr = "http://www.clintonmedbery.com/wp-content/uploads/2015/04/earthtruecolor_nasa_big.jpg"; //is url for now
+
+        mybmp = DownloadImage.get(qr);
         earthTexture.setBitmap(mybmp);
         if (mybmp == null){
             Log.v("Hey", "It's null");
@@ -63,12 +66,16 @@ public class Renderer extends RajawaliRenderer {
         earthSphere.setMaterial(material);
         getCurrentScene().addChild(earthSphere);
         getCurrentCamera().setZ(4.2f);
+
+        ((MainActivity) context).setQRAndDimensions(qr, mybmp.getWidth(), mybmp.getHeight());
     }
     @Override
     public void onRender(final long elapsedTime, final double deltaTime) {
         super.onRender(elapsedTime, deltaTime);
         earthSphere.rotate(Vector3.Axis.Y, 1.0);
     }
+
+    @Override
     public void onTouchEvent(MotionEvent event){
     }
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
@@ -9,21 +8,10 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.mobsec.a3dtest.MainActivity">
+    tools:context="com.mobsec.qrtest.MainActivity">
 
-    <WebView
-        android:id="@+id/webView"
+    <com.dlazaro66.qrcodereaderview.QRCodeReaderView
+        android:id="@+id/qrdecoderview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
-    <SurfaceView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/surfaceView"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentTop="true" />
-
+        android:layout_height="match_parent" />
 </RelativeLayout>
