@@ -12,7 +12,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import org.rajawali3d.surface.IRajawaliSurface;
@@ -21,12 +24,16 @@ import org.rajawali3d.surface.RajawaliSurfaceView;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
+import static android.view.View.GONE;
+
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private SurfaceView mView;
     private SurfaceHolder mHolder;
     private Camera mCamera;
     Renderer renderer;
     RajawaliSurfaceView surface;
+    WebView mWebView;
+    private String webViewUrl = "http://aadah.me";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -44,6 +51,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         mHolder = mView.getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        mWebView = (WebView) findViewById(R.id.webView);
+
+        surface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mView.setVisibility(GONE);
+                surface.setVisibility(GONE);
+                mWebView.setVisibility(View.VISIBLE);
+                startDrawing();
+            }
+        });
 
         // Add mSurface to your root view
         addContentView(surface, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
@@ -111,5 +129,36 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         catch (Exception e){
         }
         return c;
+    }
+
+    private String qr;
+    private int width;
+    private int height;
+
+    public void setQRAndDimensions(String _qr, int _width, int _height){
+        qr = _qr;
+        width = _width;
+        height = _height;
+    }
+
+    public void startDrawing(){
+        mWebView.getSettings().setJavaScriptEnabled(false);
+        mWebView.getSettings().setDomStorageEnabled(true);
+        mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
+                return false;
+            }
+        });
+        mWebView.loadUrl(webViewUrl);
+        mWebView.loadUrl("javascript:receiveQrAndDimensions('" + qr + "' , " + width + " , " + height + ")");
+    }
+
+    public void stopDrawing(){
+        mWebView.setVisibility(GONE);
+        mView.setVisibility(View.VISIBLE);
+        surface.setVisibility(View.VISIBLE);
+        //TODO refresh image on surface
     }
 }

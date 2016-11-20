@@ -16,9 +16,11 @@ import java.io.InputStream;
 
 public class DownloadImage {
 
+    private static String MAIN_URL = "website.com/image/";
+    private static String IMG_FORMAT = ".png";
+
     public static Bitmap get(String url) {
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
+        StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.LAX);
 
         Bitmap img = null;
         try {
@@ -30,5 +32,10 @@ public class DownloadImage {
         }
 
         return img;
+    }
+
+    public static String qrToUrl(String qr) {
+        String url = MAIN_URL + qr + IMG_FORMAT;
+        return url;
     }
 }
