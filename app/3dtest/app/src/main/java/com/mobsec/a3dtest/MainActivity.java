@@ -5,10 +5,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.PointF;
 import android.hardware.Camera;
-import android.os.StrictMode;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -16,7 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
+
+import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
 
 import org.rajawali3d.surface.IRajawaliSurface;
 import org.rajawali3d.surface.RajawaliSurfaceView;
@@ -27,14 +28,14 @@ import java.util.concurrent.ExecutionException;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
-public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
+public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback, QRCodeReaderView.OnQRCodeReadListener {
     private SurfaceView mView;
     private SurfaceHolder mHolder;
     private Camera mCamera;
     Renderer renderer;
-    RajawaliSurfaceView surface;
-    WebView mWebView;
+    private WebView mWebView;
     private String webViewUrl = "http://aadah.me";
+    private QRCodeReaderView mQRView;
 
     private enum VIEW_STATE {
         QR_SCANNER,
@@ -42,43 +43,33 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         WEB_VIEW;
     }
 
+    private VIEW_STATE currentViewState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        surface = new RajawaliSurfaceView(this);
-        surface.getHolder().setFormat(PixelFormat.TRANSPARENT);
-        surface.setZOrderOnTop(true);
-        surface.setFrameRate(60.0);
-        surface.setRenderMode(IRajawaliSurface.RENDERMODE_WHEN_DIRTY);
-        surface.setTransparent(true);
+        //QR VIEW
+        mQRView = (QRCodeReaderView) findViewById(R.id.qrCodeReaderView);
+        mQRView.setOnQRCodeReadListener(this);
+        mQRView.setQRDecodingEnabled(true);
+        mQRView.setBackCamera();
+
+        //SURFACE VIEW - Background
         mCamera = getCameraInstance();
         mView = (SurfaceView) findViewById(R.id.surfaceView);
         mHolder = mView.getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+
+        //WEB VIEW
         mWebView = (WebView) findViewById(R.id.webView);
 
-        surface.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startDrawing();
-            }
-        });
 
-        // Add mSurface to your root view
-        addContentView(surface, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
-
-        try {
-            renderer = new Renderer(this);
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        surface.setSurfaceRenderer(renderer);
+        //CURRENT VIEW
+        switchToView(VIEW_STATE.SURFACE);
     }
 
     @Override
@@ -136,14 +127,70 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         return c;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mQRView.startCamera();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mQRView.stopCamera();
+    }
+
     private String qr;
     private int width;
     private int height;
 
-    public void setQRAndDimensions(String _qr, int _width, int _height){
-        qr = _qr;
-        width = _width;
-        height = _height;
+    // Called when a QR is decoded
+    // "text" : the text encoded in QR
+    // "points" : points where QR control points are placed in View
+    @Override
+    public void onQRCodeRead(String text, PointF[] points) {
+        qr = text;
+        switchToView(VIEW_STATE.SURFACE);
+    }
+
+    RajawaliSurfaceView surface;
+
+    public void createARObject(){
+
+        //download  image every time, in case it needs to be refreshed
+        String url = DownloadImage.qrToUrl(qr);
+        url = "http://www.pagetutor.com/image_compression/bee.bmp"; //TODO temp take this out
+        Bitmap bmp = DownloadImage.get(url);
+        width = bmp.getWidth();
+        height = bmp.getHeight();
+
+        //Render the object
+        surface = new RajawaliSurfaceView(this);
+        try {
+            renderer = new Renderer(this, bmp);
+            surface.setSurfaceRenderer(renderer);
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        surface.getHolder().setFormat(PixelFormat.TRANSPARENT);
+        surface.setZOrderOnTop(true);
+        surface.setTransparent(true);
+        surface.setFrameRate(60.0);
+        surface.setRenderMode(IRajawaliSurface.RENDERMODE_WHEN_DIRTY);
+        surface.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startDrawing();
+                destroyARObject();
+            }
+        });
+
+        addContentView(surface, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    public void destroyARObject(){
+        ((ViewGroup) surface.getParent()).removeView(surface);
     }
 
     public void startDrawing(){
@@ -163,32 +210,40 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     public void stopDrawing(){
         switchToView(VIEW_STATE.SURFACE);
-        //TODO refresh image on surface
     }
 
     @Override
     public void onBackPressed(){
-        if (mWebView.getVisibility() == VISIBLE){
+        if (currentViewState == VIEW_STATE.WEB_VIEW){
             stopDrawing();
+        } else if (currentViewState == VIEW_STATE.SURFACE) {
+            destroyARObject();
+            switchToView(VIEW_STATE.QR_SCANNER);
+        } else {
+            super.onBackPressed();
         }
     }
 
     private void switchToView(VIEW_STATE view){
         switch (view){
             case QR_SCANNER:
+                mQRView.setVisibility(VISIBLE);
                 mView.setVisibility(GONE);
-                surface.setVisibility(GONE);
                 mWebView.setVisibility(GONE);
+                currentViewState = VIEW_STATE.QR_SCANNER;
                 break;
             case SURFACE:
+                mQRView.setVisibility(GONE);
                 mView.setVisibility(VISIBLE);
-                surface.setVisibility(VISIBLE);
                 mWebView.setVisibility(GONE);
+                createARObject();
+                currentViewState = VIEW_STATE.SURFACE;
                 break;
             case WEB_VIEW:
+                mQRView.setVisibility(GONE);
                 mView.setVisibility(GONE);
-                surface.setVisibility(GONE);
                 mWebView.setVisibility(VISIBLE);
+                currentViewState = VIEW_STATE.WEB_VIEW;
         }
     }
 
