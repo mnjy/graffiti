@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
         WEB_VIEW;
     }
 
-    private VIEW_STATE currentViewState = VIEW_STATE.QR_SCANNER;
+    private VIEW_STATE currentViewState;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +87,9 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
 
     public void createARObject(){
 
-        Bitmap bmp = null;
         //download  image every time, in case it needs to be refreshed
-        if (qr != null) {
-            String url = DownloadImage.qrToUrl(qr);
-            bmp = DownloadImage.get(url);
-        }
+        String url = DownloadImage.qrToUrl(qr); //(if null, opens the image "null.png"). this is useful for testing
+        Bitmap bmp = DownloadImage.get(url);
         if (bmp != null) {
             width = bmp.getWidth();
             height = bmp.getHeight();

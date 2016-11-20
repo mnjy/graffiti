@@ -8,7 +8,9 @@ import android.util.Log;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 
 /**
  * Usage: Bitmap img = DownloadImage.get(url);
@@ -27,7 +29,9 @@ public class DownloadImage {
             InputStream in = new java.net.URL(url).openStream();
             img = BitmapFactory.decodeStream(in);
             in.close();
-        } catch (Exception e) {
+        } catch (FileNotFoundException e) {
+            Log.d("DownloadImage", "Image not yet in database, will create it.");
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

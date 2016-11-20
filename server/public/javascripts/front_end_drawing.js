@@ -1,7 +1,7 @@
 /**
  TODO:
  DONE:
- - if mosue not moved, do nothing
+ - if mouse not moved, do nothing
  - one curve: mouse press - mouse release
  - sliders: change stroke's color and weight
     - change strokeWeight
