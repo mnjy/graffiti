@@ -23,13 +23,13 @@ var weightSlider, colorSlider, undoButton, clearButton;
 var buttonAreasBottomY = 40;
 var colorSliderX, colorSliderY, colorSliderWidth;
 var weightSliderX, weightSliderY, weightSliderWidth;
-var weightMax = 40;
-var weightAmount = 15;
-var MAX_COLOR = 16777215;
+var weightArray = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40];
+var weightAmount = weightArray.length;
+var MAX_COLOR_HSB = 1;
 var colorAmount = 20;
 // run once before draw()
 function setup() {
-  var canvas = createCanvas(displayWidth, displayHeight);
+  var canvas = createCanvas(windowWidth, windowHeight);
   // Move the canvas so it's inside <div id="sketch-holder">.
   // canvas.parent('sketch-holder');
   // var x = (windowWidth - width) / 2;
@@ -39,21 +39,23 @@ function setup() {
   // init the object containing current edits info
   initCurrentEdits();
   // slider used to change stroke weight
-  weightSlider = createSlider(0, weightMax, 10, weightMax / weightAmount);
+  weightSlider = createSlider(1, weightAmount, 1, 1);
   // slider used to change stroke color
-  colorSlider = createSlider(0, colorAmount, 0, 1);
+  colorSlider = createSlider(0, colorAmount, 4, 1);
   // button - undo
   undoButton = createButton('undo');
-  styleButton(undoButton, displayWidth*0.9, 0);
+  styleButton(undoButton, width*0.9, 0);
   undoButton.mousePressed(undoEvent);
   // button - clear
   clearButton = createButton('clear');
-  styleButton(clearButton, displayWidth*0.9, 20);
+  styleButton(clearButton, width*0.9, 20);
   clearButton.mousePressed(clearEvent);
 }
 
 // run forever
 function draw() {
+  // colorMode(HSB, MAX_COLOR_HSB);
+
   weightSliderX = 10;
   weightSliderY = 10;
   weightSliderWidth = width*0.4;
@@ -70,7 +72,7 @@ function draw() {
   }
 
   // set color and weight
-  currentEdits.color = toHexColor(int(colorSlider.value() / colorAmount * MAX_COLOR));
+  currentEdits.color = toColor(colorSlider.value());
   currentEdits.weight = weightSlider.value();
   // if mouse has not been moved, do nothing
   // else, push current coordinates to "currentEdits"
@@ -94,11 +96,11 @@ function draw() {
   rect(0, 0, width, buttonAreasBottomY);
 
   // display weight
-  var wightEachWidth = weightSliderWidth / weightAmount;
+  var weightEachWidth = weightSliderWidth / (weightAmount-1);
   fill(color(currentEdits.color));
-  for (var i = 0; i <= weightAmount; i++) {
-    var myX = weightSliderX + i * weightSliderWidth / weightAmount;
-    ellipse(myX, weightSliderY*2, i / weightAmount * weightMax);
+  for (var i = 0; i < weightAmount; i++) {
+    var myX = weightSliderX + i * weightEachWidth;
+    ellipse(myX, weightSliderY*2, weightArray[i]);
   }
   styleSlider(weightSlider, weightSliderX, weightSliderY, weightSliderWidth);
 
@@ -106,13 +108,12 @@ function draw() {
   fill(100);
   strokeWeight(1);
   var colorPickerBottom = colorSliderY*4;
-  var colorEachWidth = colorSliderWidth / colorAmount;
+  var colorEachWidth = colorSliderWidth / (colorAmount-1);
   for (var i = 0; i < colorAmount; i++) {
     var myX = colorSliderX + i * colorSliderWidth / colorAmount;
 
-    fill(color(toHexColor(int(i/colorAmount*MAX_COLOR))));
+    fill(toColor(i));
     rect(myX, 0, colorEachWidth, colorPickerBottom);
-
   }
   // rect(colorSliderX, 0, colorSliderWidth, colorSliderY*4);
   styleSlider(colorSlider, colorSliderX, colorSliderY, colorSliderWidth);
@@ -181,7 +182,7 @@ function styleButton(button, posX, posY) {
 /*** other funcs ***/
 // draw from the array
 function drawEdits(edits) {
-  stroke(color(edits.color));
+  stroke(edits.color);
   strokeWeight(edits.weight);
   var dots = edits.dots;
   beginShape();
@@ -191,12 +192,44 @@ function drawEdits(edits) {
   endShape();
 }
 
-// convert decimal to hex
-function toHexColor(d) {
-    return "#"+nf(Number(d).toString(16),6)
+// using HSB now (convert decimal to hex)
+function toColor(d) {
+    var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*0.7, MAX_COLOR_HSB);
+    return RGBtoHEX(c.r, c.g, c.b);
+    // return "#"+nf(Number(d).toString(16),6);
 }
 
+function HSVtoRGB(h, s, v) {
+    var r, g, b, i, f, p, q, t;
+    if (arguments.length === 1) {
+        s = h.s, v = h.v, h = h.h;
+    }
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+    };
+}
 
+function RGBtoHEX(r, g, b) {
+    return  '#' + [r, g, b].map(x => {
+      const hex = x.toString(16)
+      return hex.length === 1 ? '0' + hex : hex
+    }).join('')
+}
 /*** funcs dealing with socket/multi-users ***/
 // getting "allEdits"
 function getAllEdits() {
