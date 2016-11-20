@@ -80,7 +80,7 @@ function draw() {
 // built-in mouseReleased event handler
 function mouseReleased() {
   if (currentEdits.dots.length) {
-    allEdits.push(currentEdits);
+    // allEdits.push(currentEdits);
     send_stroke({
       'timestamp': new Date().getTime(),
       'room': socket.room,
