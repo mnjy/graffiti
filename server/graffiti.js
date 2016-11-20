@@ -18,6 +18,10 @@ function Edits(_info) {
         return strokes;
     };
 
+    this.clear = function () {
+        strokes = [];
+    };
+
     this.dot_to_pixels = function (dot, color, weight) {
         var x = dot.posX;
         var y = dot.posY;
@@ -125,7 +129,7 @@ function Edits(_info) {
 
     this.save_if_present = function (path) {
         var pixels = this.get_pixels();
-        var converter = this.hex_to_rgb;
+        var edits = this;
 
         fs.createReadStream(path).pipe(new PNG()).on('parsed', function() {
                 'use strict';
@@ -136,7 +140,7 @@ function Edits(_info) {
                         y = Math.round(Number(parts[1])),
                         color = parts[2];
                     var idx = (this.width * y + x) << 2;
-                    var c = converter(color);
+                    var c = edits.hex_to_rgb(color);
                     this.data[idx  ] = c.r;
                     this.data[idx+1] = c.g;
                     this.data[idx+2] = c.b;
@@ -144,6 +148,7 @@ function Edits(_info) {
                 }
 
             this.pack().pipe(fs.createWriteStream(path));
+            edits.clear();
         });
     };
 
@@ -171,6 +176,7 @@ function Edits(_info) {
         }
 
         png.pack().pipe(fs.createWriteStream(path));
+        this.clear();
     };
 }
 
