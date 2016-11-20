@@ -4,6 +4,7 @@
 
 function join_room(room) {
     console.log(this.id, 'joins', room);
+    this.join(room);
     this.art_room = room;
 }
 
@@ -20,6 +21,7 @@ function connection(socket) {
 
     // add socket.on events here
     socket.on('join_room', join_room);
+    socket.on('send_stroke', send_stroke);
 }
 
 module.exports = connection;

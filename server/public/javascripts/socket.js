@@ -1,10 +1,10 @@
 var socket;
 
-function join_room(socket, data) {
+function join_room(data) {
     socket.emit('join_room', data);
 }
 
-function send_stroke(socket, data) {
+function send_stroke(data) {
     socket.emit('send_stroke', data);
 }
 

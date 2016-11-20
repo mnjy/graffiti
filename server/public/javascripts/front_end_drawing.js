@@ -81,6 +81,7 @@ function mouseReleased() {
   if (currentEdits.dots.length) {
     allEdits.push(currentEdits);
     console.log(currentEdits);
+    send_stroke(currentEdits);
     initCurrentEdits();
   }
 }
