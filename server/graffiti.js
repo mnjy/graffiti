@@ -13,6 +13,10 @@ function Edits(_code) {
         return strokes.length;
     };
 
+    this.get_strokes = function () {
+        return strokes;
+    };
+
     this.save = function () {
         // save as png with name [this.code].png
         // does so by loading file and

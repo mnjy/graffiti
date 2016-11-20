@@ -10,7 +10,12 @@ function join_room(room) {
     if (!(room in rooms)) {
         rooms[room] = new graffiti.Edits(room);
     }
-    this.emit('joined_room', room);
+    data = {
+        'room': room,
+        'edits': rooms[room].get_strokes()
+    };
+
+    this.emit('joined_room', data);
 }
 
 function send_stroke(stroke) {
