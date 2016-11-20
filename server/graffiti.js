@@ -6,7 +6,11 @@ function Edits(_code) {
         strokes = [];
 
     this.add_stroke = function (stroke) {
-        this.strokes.push(stroke);
+        strokes.push(stroke);
+    };
+
+    this.num_strokes = function () {
+        return strokes.length;
     };
 
     this.save = function () {

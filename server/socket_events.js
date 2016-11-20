@@ -14,12 +14,13 @@ function join_room(room) {
 }
 
 function send_stroke(stroke) {
-    console.log(this.server.rooms);
-    console.log(this.room);
-    console.log(stroke.room);
+    if (!(this.room)) {
+        return;
+    }
     this.server.rooms[this.room].add_stroke(stroke);
-    this.broadcast.to(this.room).emit('draw_stroke', stroke);
-    console.log(this.server.rooms.length);
+    this.server.emit('draw_stroke', stroke);
+    // this.broadcast.to(this.room).emit('draw_stroke', stroke);
+    console.log(this.server.rooms[this.room].num_strokes());
 }
 
 //function
