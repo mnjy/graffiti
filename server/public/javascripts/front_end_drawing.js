@@ -261,4 +261,5 @@ function updateDraws(data) {
 /*** funcs dealing with APP ***/
 function receiveQrAndDimensions(qr, width, height) {
   console.log(qr + ", " + width + ", " + height);
+  join_room(qr, width, height);
 }
