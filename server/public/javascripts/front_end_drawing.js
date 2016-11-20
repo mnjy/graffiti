@@ -10,7 +10,6 @@
     - change strokeWeight
     - change color
     - avoid any drawing on button areas
-
   - buttons:
     - undo
     - clear
@@ -29,7 +28,7 @@ function setup() {
   // init the object containing current edits info
   initCurrentEdits();
   // slider used to change stroke weight
-  weightSlider = createSlider(1, 20, 1);
+  weightSlider = createSlider(1, 40, 1);
   styleSlider(weightSlider, 0, 10, windowWidth*0.4);
   // slider used to change stroke color
   colorSlider = createSlider(0, 16777215, 1);
@@ -64,10 +63,12 @@ function draw() {
   // else, push current coordinates to "currentEdits"
   var edit;
   // if (mouseX != pmouseX && mouseY != pmouseY) {
-  if (mouseIsPressed && mouseY > buttonAreasBottomY) {
+  if ((touchIsDown || mouseIsPressed)
+    && mouseY > buttonAreasBottomY
+   ) {
     edit = {
-      "posX": mouseX,
-      "posY": mouseY
+      "posX": touchX || mouseX,
+      "posY": touchY || mouseY
     };
     currentEdits.dots.push(edit);
   }
@@ -82,12 +83,31 @@ function mouseReleased() {
     allEdits.push(currentEdits);
     send_stroke({
       'timestamp': new Date().getTime(),
-      'room': null,
+      'room': socket.room,
       'edits': currentEdits
     });
     initCurrentEdits();
   }
 }
+
+function touchEnded() {
+  // if is mobile
+  if (typeof window.orientation !== 'undefined') {
+    if (currentEdits.dots.length) {
+      allEdits.push(currentEdits);
+      send_stroke({
+        'timestamp': new Date().getTime(),
+        'room': socket.room,
+        'edits': currentEdits
+      });
+      initCurrentEdits();
+    }
+  }
+}
+
+// function keyPressed() {
+//   saveCanvas('myCanvas', 'jpg');
+// }
 
 // click "undo": remove the last object in "allEdits"
 function undoEvent() {
@@ -127,6 +147,7 @@ function drawEdits(edits) {
   }
   endShape();
 }
+
 // convert decimal to hex
 function toHexColor(d) {
     return "#"+nf(Number(d).toString(16),6)
