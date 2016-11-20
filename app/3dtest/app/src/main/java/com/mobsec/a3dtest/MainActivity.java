@@ -138,6 +138,7 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
         switchToView(VIEW_STATE.WEB_VIEW);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
+        mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.getSettings().setUseWideViewPort(true);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
