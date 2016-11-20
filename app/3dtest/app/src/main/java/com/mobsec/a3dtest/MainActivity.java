@@ -6,10 +6,12 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView;
 
@@ -68,7 +70,7 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
     }
 
     //defaults
-    private String qr = "graffiti";
+    private String qr;
     private int width = 256;
     private int height = 256;
 
@@ -85,12 +87,17 @@ public class MainActivity extends AppCompatActivity implements QRCodeReaderView.
 
     public void createARObject(){
 
+        Bitmap bmp = null;
         //download  image every time, in case it needs to be refreshed
-        String url = DownloadImage.qrToUrl(qr);
-        Bitmap bmp = DownloadImage.get(url);
+        if (qr != null) {
+            String url = DownloadImage.qrToUrl(qr);
+            bmp = DownloadImage.get(url);
+        }
         if (bmp != null) {
             width = bmp.getWidth();
             height = bmp.getHeight();
+        } else {
+            Toast.makeText(this, "A blank canvas!", Toast.LENGTH_SHORT).show();
         }
 
         //Render the object

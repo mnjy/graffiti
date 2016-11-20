@@ -1,11 +1,9 @@
 package com.mobsec.a3dtest;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
 
 import org.rajawali3d.lights.DirectionalLight;
 import org.rajawali3d.materials.Material;
@@ -14,7 +12,6 @@ import org.rajawali3d.materials.textures.ATexture;
 import org.rajawali3d.materials.textures.Texture;
 import org.rajawali3d.math.vector.Vector3;
 import org.rajawali3d.primitives.Cube;
-import org.rajawali3d.primitives.Sphere;
 import org.rajawali3d.renderer.RajawaliRenderer;
 
 import java.util.concurrent.ExecutionException;
@@ -28,7 +25,7 @@ public class Renderer extends RajawaliRenderer {
     public Context context;
     String qr;
     private DirectionalLight directionalLight;
-    public Cube earthSphere;
+    public Cube cube;
     public Material material;
 
     public Renderer(Context context, Bitmap bmp) throws ExecutionException, InterruptedException {
@@ -49,21 +46,22 @@ public class Renderer extends RajawaliRenderer {
         material.setDiffuseMethod(new DiffuseMethod.Lambert());
         material.setColor(0);
 
-        Texture earthTexture = new Texture("Earth", R.drawable.earthtruecolor_nasa_big);
-        earthTexture.setBitmap(mybmp);
+        Texture texture = new Texture("Earth", R.drawable.earthtruecolor_nasa_big);
+        texture.setBitmap(mybmp);
         if (mybmp == null){
-            Log.d("Renderer", "Bitmap is null, rendering plain black cube");
-        }
-        try {
-            material.addTexture(earthTexture);
-        } catch (ATexture.TextureException e) {
-            e.printStackTrace();
+            Log.d("Renderer", "No stored image, rendering plain object");
+        } else {
+            try {
+                material.addTexture(texture);
+            } catch (ATexture.TextureException e) {
+                e.printStackTrace();
+            }
         }
 
-        earthSphere = new Cube(1);
-        earthSphere.setMaterial(material);
+        cube = new Cube(1);
+        cube.setMaterial(material);
 
-        getCurrentScene().addChild(earthSphere);
+        getCurrentScene().addChild(cube);
         getCurrentCamera().setZ(4.2f);
     }
 
@@ -71,7 +69,7 @@ public class Renderer extends RajawaliRenderer {
     public void onRender(final long elapsedTime, final double deltaTime) {
         super.onRender(elapsedTime, deltaTime);
 
-        earthSphere.rotate(Vector3.Axis.Y, 1.0);
+        cube.rotate(Vector3.Axis.Y, 1.0);
     }
 
     @Override
