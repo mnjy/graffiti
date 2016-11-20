@@ -6,7 +6,15 @@ function Edits(_code) {
         strokes = [];
 
     this.add_stroke = function (stroke) {
-        this.strokes.push(stroke);
+        strokes.push(stroke);
+    };
+
+    this.num_strokes = function () {
+        return strokes.length;
+    };
+
+    this.get_strokes = function () {
+        return strokes;
     };
 
     this.save = function () {
@@ -18,4 +26,8 @@ function Edits(_code) {
 
 function load_graffiti(code) {
     //
+}
+
+module.exports = {
+    'Edits': Edits
 }

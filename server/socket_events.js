@@ -10,13 +10,21 @@ function join_room(room) {
     if (!(room in rooms)) {
         rooms[room] = new graffiti.Edits(room);
     }
-    this.emit('joined_room', room);
+    data = {
+        'room': room,
+        'edits': rooms[room].get_strokes()
+    };
+
+    this.emit('joined_room', data);
 }
 
 function send_stroke(stroke) {
-    this.server.rooms[stroke.room].add_stroke(stroke);
-    this.broadcast.to(this.room).emit('draw_stroke', stroke);
-    console.log(this.server.rooms.length);
+    if (!(this.room)) {
+        return;
+    }
+    this.server.rooms[this.room].add_stroke(stroke);
+    this.server.to(this.room).emit('draw_stroke', stroke);
+    console.log(this.server.rooms[this.room].num_strokes());
 }
 
 //function
