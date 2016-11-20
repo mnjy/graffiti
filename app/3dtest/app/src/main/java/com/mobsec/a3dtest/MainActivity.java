@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private Camera mCamera;
     Renderer renderer;
     private WebView mWebView;
-    private String webViewUrl = "http://aadah.me";
+    private String webViewUrl = "http://18.189.15.154:3000";
     private QRCodeReaderView mQRView;
 
     private enum VIEW_STATE {
