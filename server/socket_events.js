@@ -2,20 +2,42 @@ var graffiti = require('./graffiti');
 
 // this = socket
 // this.server = io
-function join_room(room) {
-    console.log(this.id, 'joins', room);
-    this.join(room);
-    this.room = room;
+function join_room(info) {
+    if (this.room == info.room) {
+        return;
+    }
+
+    console.log(this.id, 'joins', info.room);
+    if (this.room) {
+        this.leave(this.room);
+    }
+    this.join(info.room);
+    this.room = info.room;
     rooms = this.server.rooms;
-    if (!(room in rooms)) {
-        rooms[room] = new graffiti.Edits(room);
+    if (!(info.room in rooms)) {
+        rooms[info.room] = new graffiti.Edits(info);
     }
     data = {
-        'room': room,
-        'edits': rooms[room].get_strokes()
+        'info': info,
+        'edits': rooms[info.room].get_strokes()
     };
 
     this.emit('joined_room', data);
+    console.log(this.server.sockets.adapter.rooms[info.room].length);
+}
+
+function leave_room(room) {
+    console.log(this.id, 'leaves', room);
+    this.leave(this.room);
+    this.room = undefined;
+
+    edits = this.server.rooms[room];
+    if (!(this.server.sockets.adapter.rooms[room])) {
+        edits.save();
+        delete this.server.rooms[room];
+    }
+
+    this.emit('leaved_room', room);
 }
 
 function send_stroke(stroke) {
@@ -36,6 +58,7 @@ function connection(socket) {
 
     // add socket.on events here
     socket.on('join_room', join_room);
+    socket.on('leave_room', leave_room);
     socket.on('send_stroke', send_stroke);
 }
 

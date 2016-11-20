@@ -1,8 +1,5 @@
 /**
  TODO:
- - style the slider
-    - show color
- - style the button
  DONE:
  - if mosue not moved, do nothing
  - one curve: mouse press - mouse release
@@ -13,6 +10,8 @@
   - buttons:
     - undo
     - clear
+  - style the slider
+   - show color
  **/
 
 // store all edits info
@@ -20,28 +19,17 @@ var allEdits = [];
 // containing current edits info
 var currentEdits = {};
 var weightSlider, colorSlider, undoButton, clearButton;
-var buttonAreasBottomY = 40;
-var colorSliderX, colorSliderY, colorSliderWidth;
-var weightSliderX, weightSliderY, weightSliderWidth;
 var weightArray = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40];
 var weightAmount = weightArray.length;
 var MAX_COLOR_HSB = 1;
 var colorAmount = 20;
+var colorIndex, weightIndex = 0;
+var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 // run once before draw()
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
-  // Move the canvas so it's inside <div id="sketch-holder">.
-  // canvas.parent('sketch-holder');
-  // var x = (windowWidth - width) / 2;
-  // var y = (windowHeight - height) / 2;
-  // canvas.position(x, y);
-
   // init the object containing current edits info
   initCurrentEdits();
-  // slider used to change stroke weight
-  weightSlider = createSlider(1, weightAmount, 1, 1);
-  // slider used to change stroke color
-  colorSlider = createSlider(0, colorAmount, 4, 1);
   // button - undo
   undoButton = createButton('undo');
   styleButton(undoButton, width*0.9, 0);
@@ -50,20 +38,18 @@ function setup() {
   clearButton = createButton('clear');
   styleButton(clearButton, width*0.9, 20);
   clearButton.mousePressed(clearEvent);
-}
 
+  barTopOrBottom = height * 0.2;
+  barLeftOrRight = width * 0.05;
+  weightEachGap = (height-barTopOrBottom*2) / (weightAmount-1);
+  colorEachGap = (height-barTopOrBottom*2) / (colorAmount-1);
+  weightBox = {left: 0, right: barLeftOrRight, top: barTopOrBottom, bottom: height-barTopOrBottom};
+  colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
+
+}
+// var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
-  // colorMode(HSB, MAX_COLOR_HSB);
-
-  weightSliderX = 10;
-  weightSliderY = 10;
-  weightSliderWidth = width*0.4;
-
-  colorSliderX = width*0.45;
-  colorSliderY = 10;
-  colorSliderWidth = width*0.4;
-
   background(51);
 
   // keep what you've drawn on the canvas
@@ -72,15 +58,15 @@ function draw() {
   }
 
   // set color and weight
-  currentEdits.color = toColor(colorSlider.value());
-  currentEdits.weight = weightSlider.value();
+  currentEdits.color = toColor(colorIndex);
+  currentEdits.weight = weightArray[weightIndex];
   // if mouse has not been moved, do nothing
   // else, push current coordinates to "currentEdits"
   var edit;
   // if (mouseX != pmouseX && mouseY != pmouseY) {
   if ((touchIsDown || mouseIsPressed)
-    && mouseY > buttonAreasBottomY
-   ) {
+    && !ifInsideBox(colorBox)
+    && !ifInsideBox(weightBox)) {
     edit = {
       "posX": touchX || mouseX,
       "posY": touchY || mouseY
@@ -91,39 +77,54 @@ function draw() {
   drawEdits(currentEdits);
 
   // display button/slider bar
-  fill(255);
-  noStroke();
-  rect(0, 0, width, buttonAreasBottomY);
-
   // display weight
-  var weightEachWidth = weightSliderWidth / (weightAmount-1);
   fill(color(currentEdits.color));
   for (var i = 0; i < weightAmount; i++) {
-    var myX = weightSliderX + i * weightEachWidth;
-    ellipse(myX, weightSliderY*2, weightArray[i]);
+    noStroke();
+    if (i == weightIndex) {
+      strokeWeight(5);
+      stroke(0);
+    }
+    ellipse(barLeftOrRight, barTopOrBottom + weightEachGap * i, weightArray[i]);
   }
-  styleSlider(weightSlider, weightSliderX, weightSliderY, weightSliderWidth);
-
+  if (ifInsideBox(weightBox)) {
+    weightIndex = Math.round((mouseY - barTopOrBottom) / weightEachGap);
+  }
   // display color
-  fill(100);
-  strokeWeight(1);
-  var colorPickerBottom = colorSliderY*4;
-  var colorEachWidth = colorSliderWidth / (colorAmount-1);
+  noStroke();
   for (var i = 0; i < colorAmount; i++) {
-    var myX = colorSliderX + i * colorSliderWidth / colorAmount;
-
-    fill(toColor(i));
-    rect(myX, 0, colorEachWidth, colorPickerBottom);
+    if (i == colorIndex) {
+      fill(toColor(i, 1));
+    } else {
+      fill(toColor(i));
+    }
+    rect(width-barLeftOrRight*2, barTopOrBottom+colorEachGap*i, barLeftOrRight*2, colorEachGap);
   }
-  // rect(colorSliderX, 0, colorSliderWidth, colorSliderY*4);
-  styleSlider(colorSlider, colorSliderX, colorSliderY, colorSliderWidth);
+  if (ifInsideBox(colorBox)) {
+    colorIndex = Math.round((mouseY - barTopOrBottom) / colorEachGap);
+  }
   noFill();
+}
+
+function ifInsideBox(box) {
+  return mouseX >= box.left
+      && mouseX <= box.right
+      && mouseY >= box.top
+      && mouseY <= box.bottom;
 }
 
 /*** event handler funcs ***/
 // built-in mouseReleased event handler
 function mouseReleased() {
+
+  // // for tetsing only
+  // if (!ifJoinedRoomForTesting) {
+  //   join_room("test");
+  //   ifJoinedRoomForTesting = true;
+  // }
+  //
   if (currentEdits.dots.length) {
+
     // allEdits.push(currentEdits);
     send_stroke({
       'timestamp': new Date().getTime(),
@@ -135,10 +136,18 @@ function mouseReleased() {
 }
 
 function touchEnded() {
+
+  // // for tetsing only
+  // if (!ifJoinedRoomForTesting) {
+  //   join_room("test");
+  //   ifJoinedRoomForTesting = true;
+  // }
+
   // if is mobile
   if (typeof window.orientation !== 'undefined') {
     if (currentEdits.dots.length) {
       allEdits.push(currentEdits);
+
       send_stroke({
         'timestamp': new Date().getTime(),
         'room': socket.room,
@@ -193,8 +202,8 @@ function drawEdits(edits) {
 }
 
 // using HSB now (convert decimal to hex)
-function toColor(d) {
-    var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*0.7, MAX_COLOR_HSB);
+function toColor(d, s = 0.5) {
+    var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*s, MAX_COLOR_HSB);
     return RGBtoHEX(c.r, c.g, c.b);
     // return "#"+nf(Number(d).toString(16),6);
 }
@@ -230,6 +239,7 @@ function RGBtoHEX(r, g, b) {
       return hex.length === 1 ? '0' + hex : hex
     }).join('')
 }
+
 /*** funcs dealing with socket/multi-users ***/
 // getting "allEdits"
 function getAllEdits() {
