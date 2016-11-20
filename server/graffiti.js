@@ -19,3 +19,7 @@ function Edits(_code) {
 function load_graffiti(code) {
     //
 }
+
+module.exports = {
+    'Edits': Edits
+}

@@ -14,7 +14,10 @@ function join_room(room) {
 }
 
 function send_stroke(stroke) {
-    this.server.rooms[stroke.room].add_stroke(stroke);
+    console.log(this.server.rooms);
+    console.log(this.room);
+    console.log(stroke.room);
+    this.server.rooms[this.room].add_stroke(stroke);
     this.broadcast.to(this.room).emit('draw_stroke', stroke);
     console.log(this.server.rooms.length);
 }
