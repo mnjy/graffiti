@@ -18,8 +18,7 @@ function send_stroke(stroke) {
         return;
     }
     this.server.rooms[this.room].add_stroke(stroke);
-    this.server.emit('draw_stroke', stroke);
-    // this.broadcast.to(this.room).emit('draw_stroke', stroke);
+    this.server.to(this.room).emit('draw_stroke', stroke);
     console.log(this.server.rooms[this.room].num_strokes());
 }
 
