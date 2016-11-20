@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity implements SurfaceHolder.Callback {
     private SurfaceView mView;
@@ -34,6 +35,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     RajawaliSurfaceView surface;
     WebView mWebView;
     private String webViewUrl = "http://aadah.me";
+
+    private enum VIEW_STATE {
+        QR_SCANNER,
+        SURFACE,
+        WEB_VIEW;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -56,9 +64,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         surface.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mView.setVisibility(GONE);
-                surface.setVisibility(GONE);
-                mWebView.setVisibility(View.VISIBLE);
                 startDrawing();
             }
         });
@@ -142,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     public void startDrawing(){
+        switchToView(VIEW_STATE.WEB_VIEW);
         mWebView.getSettings().setJavaScriptEnabled(false);
         mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.setWebViewClient(new WebViewClient() {
@@ -156,9 +162,34 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     public void stopDrawing(){
-        mWebView.setVisibility(GONE);
-        mView.setVisibility(View.VISIBLE);
-        surface.setVisibility(View.VISIBLE);
+        switchToView(VIEW_STATE.SURFACE);
         //TODO refresh image on surface
     }
+
+    @Override
+    public void onBackPressed(){
+        if (mWebView.getVisibility() == VISIBLE){
+            stopDrawing();
+        }
+    }
+
+    private void switchToView(VIEW_STATE view){
+        switch (view){
+            case QR_SCANNER:
+                mView.setVisibility(GONE);
+                surface.setVisibility(GONE);
+                mWebView.setVisibility(GONE);
+                break;
+            case SURFACE:
+                mView.setVisibility(VISIBLE);
+                surface.setVisibility(VISIBLE);
+                mWebView.setVisibility(GONE);
+                break;
+            case WEB_VIEW:
+                mView.setVisibility(GONE);
+                surface.setVisibility(GONE);
+                mWebView.setVisibility(VISIBLE);
+        }
+    }
+
 }
