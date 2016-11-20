@@ -74,7 +74,7 @@ function draw() {
       IfBgLoaded = true;
     }
   } else {
-    bg = 51;
+    bg = 0;
   }
 
   background(bg);
