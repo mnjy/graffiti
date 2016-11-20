@@ -26,9 +26,10 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true" />
 
-    <com.dlazaro66.qrcodereaderview.QRCodeReaderView
-        android:id="@+id/qrCodeReaderView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <!--<com.dlazaro66.qrcodereaderview.QRCodeReaderView-->
+        <!--android:id="@+id/qrCodeReaderView"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:visibility="gone"/>-->
 
 </RelativeLayout>
