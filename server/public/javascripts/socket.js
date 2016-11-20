@@ -24,8 +24,8 @@ function joined_room(data) {
     initDraws(data.edits);
 }
 
-function leaved_room(data) {
-    console.log('leaved_room', data.room);
+function leaved_room(room) {
+    console.log('leaved_room', room);
     socket.room = undefined;
 }
 
@@ -43,8 +43,8 @@ $(function () {
     socket.on('joined_room', joined_room);
 
     var room = $('body').data('room');
-    var width = $('width').data('width');
-    var height = $('height').data('height');
+    var width = $('body').data('width');
+    var height = $('body').data('height');
 
     join_room(room, width, height);
 });

@@ -31,7 +31,9 @@ var colorIndex = colorAmount-2;
 var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 var leaveButton;
-var myRoom;
+var bg;
+var IfBgLoaded = false;
+var isInAnyRoom = true;
 // run once before draw()
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -63,12 +65,19 @@ function setup() {
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 }
 
-var bgColor = 51;
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
-  if (deviceOrientation) text(deviceOrientation, width/2, height/2);
-  background(bgColor);
+  if (socket) {
+    if (!IfBgLoaded && socket.room) {
+      bg = loadImage("/images/" + socket.room + ".png");
+      IfBgLoaded = true;
+    }
+  } else {
+    bg = 0;
+  }
+
+  background(bg);
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -83,7 +92,8 @@ function draw() {
   // else, push current coordinates to "currentEdits"
   var edit;
   // if (mouseX != pmouseX && mouseY != pmouseY) {
-  if ((touchIsDown || mouseIsPressed)
+  if (isInAnyRoom
+    && (touchIsDown || mouseIsPressed)
     && !ifInsideBox(colorBox)
     && !ifInsideBox(weightBox)) {
     edit = {
@@ -196,7 +206,8 @@ function clearEvent() {
 // click "FINISH": delete everything in "allEdits"
 function leaveEvent() {
   console.log("I am leaving now");
-  leave_room(myRoom);
+  leave_room(socket.room);
+  isInAnyRoom = false;
 }
 
 /*** init funcs ***/
@@ -259,12 +270,12 @@ function updateDraws(data) {
 }
 
 function test() {
-  bgColor = 255;
+  bg = 255;
 }
 
 /*** funcs dealing with APP ***/
-function receiveQrAndDimensions(qr, width, height) {
-  myRoom = qr;
-  console.log(myRoom + ", " + width + ", " + height);
-  join_room(myRoom, width, height);
-}
+// function receiveQrAndDimensions(qr, width, height) {
+//   myRoom = qr;
+//   console.log(myRoom + ", " + width + ", " + height);
+//   join_room(myRoom, width, height);
+// }
