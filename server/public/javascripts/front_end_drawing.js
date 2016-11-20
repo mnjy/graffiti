@@ -20,7 +20,7 @@ var allEdits = [];
 // containing current edits info
 var currentEdits = {};
 var weightSlider, colorSlider, undoButton, clearButton;
-var buttonAreasBottomY = 40;
+var buttonAreasBottomY = 80;
 var colorSliderX, colorSliderY, colorSliderWidth;
 var weightSliderX, weightSliderY, weightSliderWidth;
 var weightArray = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40];
@@ -57,11 +57,11 @@ function draw() {
   // colorMode(HSB, MAX_COLOR_HSB);
 
   weightSliderX = 10;
-  weightSliderY = 10;
+  weightSliderY = buttonAreasBottomY/4;
   weightSliderWidth = width*0.4;
 
   colorSliderX = width*0.45;
-  colorSliderY = 10;
+  colorSliderY = buttonAreasBottomY/4;
   colorSliderWidth = width*0.4;
 
   background(51);
