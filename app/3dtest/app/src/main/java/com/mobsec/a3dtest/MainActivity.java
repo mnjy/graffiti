@@ -153,14 +153,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         //download  image every time, in case it needs to be refreshed
         String url = DownloadImage.qrToUrl(qr);
-        url = "http://www.pagetutor.com/image_compression/bee.bmp";
         Bitmap bmp = DownloadImage.get(url);
         if (bmp != null) {
             width = bmp.getWidth();
             height = bmp.getHeight();
         } else { //use some defaults
-            width = 1920;
-            height = 1080;
+            width = 256;
+            height = 480;
         }
 
         //Render the object
@@ -215,6 +214,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         switchToView(VIEW_STATE.WEB_VIEW);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
+        mWebView.getSettings().setUseWideViewPort(false);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -223,8 +223,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             }
         });
         qr = "A";
-        mWebView.loadUrl(webViewUrl);
-        mWebView.loadUrl("javascript:receiveQrAndDimensions('" + qr + "' , " + width + " , " + height + ")");
+        mWebView.loadUrl(webViewUrl+"/draw/"+qr+"/"+width+"/"+height);
     }
 
     public void stopDrawing(){
