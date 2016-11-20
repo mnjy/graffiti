@@ -16,7 +16,7 @@ import java.io.InputStream;
 
 public class DownloadImage {
 
-    private static String MAIN_URL = "18.189.15.154:3000/image/";
+    private static String MAIN_URL = "http://18.189.15.154:3000/image/";
     private static String IMG_FORMAT = ".png";
 
     public static Bitmap get(String url) {
