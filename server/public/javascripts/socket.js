@@ -24,4 +24,5 @@ function draw_stroke(data) {
 $(function () {
     socket = io.connect();
     socket.on('draw_stroke', draw_stroke);
+    socket.on('joined_room', joined_room);
 });
