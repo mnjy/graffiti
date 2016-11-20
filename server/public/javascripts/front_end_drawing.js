@@ -80,8 +80,11 @@ function draw() {
 function mouseReleased() {
   if (currentEdits.dots.length) {
     allEdits.push(currentEdits);
-    console.log(currentEdits);
-    send_stroke(currentEdits);
+    send_stroke({
+      'timestamp': new Date().getTime(),
+      'room': null,
+      'edits': currentEdits
+    });
     initCurrentEdits();
   }
 }
@@ -127,4 +130,23 @@ function drawEdits(edits) {
 // convert decimal to hex
 function toHexColor(d) {
     return "#"+nf(Number(d).toString(16),6)
+}
+
+
+/*** funcs dealing with socket/multi-users ***/
+// getting "allEdits"
+function getAllEdits() {
+  return allEdits;
+}
+
+// if I'm a new user, init my "allEdits" with what people've drawn
+function initDraws(data) {
+  for (var i = 0; i < data.length; i++) {
+    allEdits.push(data[i].edits);
+  }
+}
+
+// if other's drawn anything, update my "allEdits"
+function updateDraws(data) {
+  allEdits.push(data.edits);
 }
