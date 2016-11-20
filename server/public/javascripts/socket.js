@@ -12,7 +12,8 @@ function send_stroke(data) {
 
 function joined_room(data) {
     console.log('joined_room', data);
-    socket.room = data;
+    socket.room = data.room;
+    initDraws(data.edits);
 }
 
 function draw_stroke(data) {
