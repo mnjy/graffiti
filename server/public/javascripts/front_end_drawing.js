@@ -31,7 +31,7 @@ var colorIndex = colorAmount-2;
 var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 var leaveButton;
-var myRoom;
+var bg;
 // run once before draw()
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -62,13 +62,20 @@ function setup() {
   weightBox = {left: 0, right: barLeftOrRight, top: barTopOrBottom, bottom: height-barTopOrBottom};
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 }
-
-var bgColor = 51;
+var IfBgLoaded = false;
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
-  if (deviceOrientation) text(deviceOrientation, width/2, height/2);
-  background(bgColor);
+  if (socket) {
+    if (!IfBgLoaded && socket.room) {
+      bg = loadImage("/images/" + socket.room + ".png");
+      IfBgLoaded = true;
+    }
+  } else {
+    bg = 51;
+  }
+
+  background(bg);
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -259,12 +266,12 @@ function updateDraws(data) {
 }
 
 function test() {
-  bgColor = 255;
+  bg = 255;
 }
 
 /*** funcs dealing with APP ***/
-function receiveQrAndDimensions(qr, width, height) {
-  myRoom = qr;
-  console.log(myRoom + ", " + width + ", " + height);
-  join_room(myRoom, width, height);
-}
+// function receiveQrAndDimensions(qr, width, height) {
+//   myRoom = qr;
+//   console.log(myRoom + ", " + width + ", " + height);
+//   join_room(myRoom, width, height);
+// }
