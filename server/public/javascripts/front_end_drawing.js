@@ -252,7 +252,6 @@ function drawEdits(edits) {
 
 function HEXtoRGB(hex) {
     var bigint = parseInt(hex.replace("#",""), 16);
-    console.log(bigint);
     var r = (bigint >> 16) & 255;
     var g = (bigint >> 8) & 255;
     var b = bigint & 255;
