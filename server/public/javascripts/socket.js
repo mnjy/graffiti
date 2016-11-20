@@ -1,19 +1,32 @@
 var socket;
 
-function join_room(data) {
-    socket.emit('join_room', data);
+function join_room(room, width, height) {
+    socket.emit('join_room', {
+        'room': room,
+        'width': width,
+        'height': height
+    });
 }
 
-function send_stroke(data) {
-    socket.emit('send_stroke', data);
+function leave_room(room) {
+    socket.emit('leave_room', room);
+}
+
+function send_stroke(stroke) {
+    socket.emit('send_stroke', stroke);
 }
 
 ////////////////
 
 function joined_room(data) {
-    console.log('joined_room', data);
-    socket.room = data.room;
+    console.log('joined_room', data.info.room);
+    socket.room = data.info.room;
     initDraws(data.edits);
+}
+
+function leaved_room(data) {
+    console.log('leaved_room', data.room);
+    socket.room = undefined;
 }
 
 function draw_stroke(data) {
@@ -26,6 +39,7 @@ function draw_stroke(data) {
 $(function () {
     socket = io.connect();
     socket.on('draw_stroke', draw_stroke);
+    socket.on('leaved_room', leaved_room);
     socket.on('joined_room', joined_room);
 });
 
