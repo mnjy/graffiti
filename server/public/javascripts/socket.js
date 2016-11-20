@@ -10,8 +10,13 @@ function send_stroke(data) {
 
 ////////////////
 
+function joined_room(data) {
+    socket.room = data;
+}
+
 function draw_stroke(data) {
     console.log(data);
+
 }
 
 ////////////////

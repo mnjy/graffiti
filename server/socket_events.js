@@ -5,11 +5,12 @@
 function join_room(room) {
     console.log(this.id, 'joins', room);
     this.join(room);
-    this.art_room = room;
+    this.room = room;
+    this.emit('joined_room', room);
 }
 
 function send_stroke(stroke) {
-    this.broadcast.to(this.art_room).emit('draw_stroke', stroke);
+    this.broadcast.to(this.room).emit('draw_stroke', stroke);
 }
 
 //function
