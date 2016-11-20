@@ -52,7 +52,7 @@ function setup() {
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 
 }
-var ifJoinedRoomForTesting = false;
+// var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
   if (deviceOrientation) text(deviceOrientation, width/2, height/2);
@@ -127,10 +127,10 @@ function ifInsideBox(box) {
 function mouseReleased() {
 
   // for tetsing only
-  if (!ifJoinedRoomForTesting) {
-    join_room("test", width, height);
-    ifJoinedRoomForTesting = true;
-  }
+  // if (!ifJoinedRoomForTesting) {
+  //   join_room("test", width, height);
+  //   ifJoinedRoomForTesting = true;
+  // }
 
   if (currentEdits.dots.length) {
 
@@ -147,10 +147,10 @@ function mouseReleased() {
 function touchEnded() {
 
   // for tetsing only
-  if (!ifJoinedRoomForTesting) {
-    join_room("test", width, height);
-    ifJoinedRoomForTesting = true;
-  }
+  // if (!ifJoinedRoomForTesting) {
+  //   join_room("test", width, height);
+  //   ifJoinedRoomForTesting = true;
+  // }
 
   // if is mobile
   if (typeof window.orientation !== 'undefined') {
