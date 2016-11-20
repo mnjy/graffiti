@@ -52,7 +52,7 @@ public class Renderer extends RajawaliRenderer {
         Texture earthTexture = new Texture("Earth", R.drawable.earthtruecolor_nasa_big);
         earthTexture.setBitmap(mybmp);
         if (mybmp == null){
-            Log.e("Renderer", "Bitmap is null!");
+            Log.d("Renderer", "Bitmap is null, rendering plain black cube");
         }
         try {
             material.addTexture(earthTexture);

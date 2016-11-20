@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         WEB_VIEW;
     }
 
-    private VIEW_STATE currentViewState;
+    private VIEW_STATE currentViewState = VIEW_STATE.QR_SCANNER;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,14 +52,14 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         setContentView(R.layout.activity_main);
 
         //QR VIEW
-        mQRView = (QRCodeReaderView) findViewById(R.id.qrCodeReaderView);
-        mQRView.setOnQRCodeReadListener(this);
-        mQRView.setQRDecodingEnabled(true);
-        mQRView.setBackCamera();
+//        mQRView = (QRCodeReaderView) findViewById(R.id.qrCodeReaderView);
+//        mQRView.setOnQRCodeReadListener(this);
+//        mQRView.setQRDecodingEnabled(true);
+//        mQRView.setBackCamera();
 
         //SURFACE VIEW - Background
-        mCamera = getCameraInstance();
         mView = (SurfaceView) findViewById(R.id.surfaceView);
+        mCamera = getCameraInstance();
         mHolder = mView.getHolder();
         mHolder.addCallback(this);
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -78,14 +78,13 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         try {
             mCamera.setPreviewDisplay(surfaceHolder);
             mCamera.startPreview();
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d("CameraView", "Error setting camera preview: " + e.getMessage());
         }
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i2, int i3) {
-
         if (mHolder.getSurface() == null){
             return;
         }
@@ -106,15 +105,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
     @Override
     public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-
-    }
-
-    private boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public static Camera getCameraInstance(){
@@ -123,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
             c = Camera.open();
         }
         catch (Exception e){
+            e.printStackTrace();
         }
         return c;
     }
@@ -130,13 +121,17 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onResume() {
         super.onResume();
-        mQRView.startCamera();
+//        if (currentViewState == VIEW_STATE.QR_SCANNER) {
+//        mQRView.startCamera();
+//        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mQRView.stopCamera();
+//        if (currentViewState == VIEW_STATE.QR_SCANNER) {
+//        mQRView.stopCamera();
+//        }
     }
 
     private String qr;
@@ -158,10 +153,15 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 
         //download  image every time, in case it needs to be refreshed
         String url = DownloadImage.qrToUrl(qr);
-        url = "http://www.pagetutor.com/image_compression/bee.bmp"; //TODO temp take this out
+        url = "http://www.pagetutor.com/image_compression/bee.bmp";
         Bitmap bmp = DownloadImage.get(url);
-        width = bmp.getWidth();
-        height = bmp.getHeight();
+        if (bmp != null) {
+            width = bmp.getWidth();
+            height = bmp.getHeight();
+        } else { //use some defaults
+            width = 1920;
+            height = 1080;
+        }
 
         //Render the object
         surface = new RajawaliSurfaceView(this);
@@ -193,9 +193,27 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         ((ViewGroup) surface.getParent()).removeView(surface);
     }
 
+    public void createCamera() {
+//        mCamera = getCameraInstance();
+//        try {
+//            mCamera.setPreviewDisplay(mHolder);
+//            mCamera.startPreview();
+//        } catch (IOException e) {
+//            Log.d("Camera", "Error setting camera preview: " + e.getMessage());
+//        }
+    }
+
+    public void destroyCamera(){
+//        try {
+//            mCamera.stopPreview();
+//        } catch (Exception e){
+//            Log.d("Camera", "Error stopping camera preview: " + e.getMessage());
+//        }
+    }
+
     public void startDrawing(){
         switchToView(VIEW_STATE.WEB_VIEW);
-        mWebView.getSettings().setJavaScriptEnabled(false);
+        mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -204,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 return false;
             }
         });
+        qr = "A";
         mWebView.loadUrl(webViewUrl);
         mWebView.loadUrl("javascript:receiveQrAndDimensions('" + qr + "' , " + width + " , " + height + ")");
     }
@@ -227,22 +246,28 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void switchToView(VIEW_STATE view){
         switch (view){
             case QR_SCANNER:
-                mQRView.setVisibility(VISIBLE);
+//                mQRView.setVisibility(VISIBLE);
                 mView.setVisibility(GONE);
                 mWebView.setVisibility(GONE);
+//                mQRView.startCamera();
+                destroyCamera();
                 currentViewState = VIEW_STATE.QR_SCANNER;
                 break;
             case SURFACE:
-                mQRView.setVisibility(GONE);
+//                mQRView.setVisibility(GONE);
                 mView.setVisibility(VISIBLE);
                 mWebView.setVisibility(GONE);
                 createARObject();
+//                mQRView.stopCamera();
+                createCamera();
                 currentViewState = VIEW_STATE.SURFACE;
                 break;
             case WEB_VIEW:
-                mQRView.setVisibility(GONE);
+//                mQRView.setVisibility(GONE);
                 mView.setVisibility(GONE);
                 mWebView.setVisibility(VISIBLE);
+//                mQRView.stopCamera();
+                destroyCamera();
                 currentViewState = VIEW_STATE.WEB_VIEW;
         }
     }

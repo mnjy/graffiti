@@ -19,11 +19,16 @@ var allEdits = [];
 // containing current edits info
 var currentEdits = {};
 var weightSlider, colorSlider, undoButton, clearButton;
-var weightArray = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40];
+var weightArray = [1, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 30, 40, 60];
 var weightAmount = weightArray.length;
-var MAX_COLOR_HSB = 1;
-var colorAmount = 20;
-var colorIndex, weightIndex = 0;
+var colorArray = ["#ff4d4d", "#ff824d", "#ffb84d", "#ffed4d", "#dbff4d"
+                , "#a6ff4d", "#70ff4d", "#4dff5e", "#4dff94", "#4dffc9"
+                , "#4dffff", "#4dc9ff", "#4d94ff", "#4d5eff", "#704dff"
+                , "#a64dff", "#db4dff", "#ff4ded", "#ff4db8", "#ff4d82"
+                , "#ffffff", "#000000"];
+var colorAmount = colorArray.length;
+var colorIndex = colorAmount-2;
+var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 // run once before draw()
 function setup() {
@@ -47,10 +52,12 @@ function setup() {
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 
 }
+var bgColor = 51;
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
-  background(51);
+  if (deviceOrientation) text(deviceOrientation, width/2, height/2);
+  background(bgColor);
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -58,7 +65,8 @@ function draw() {
   }
 
   // set color and weight
-  currentEdits.color = toColor(colorIndex);
+  // currentEdits.color = colorArray[colorIndex];
+  currentEdits.color = colorArray[colorIndex];
   currentEdits.weight = weightArray[weightIndex];
   // if mouse has not been moved, do nothing
   // else, push current coordinates to "currentEdits"
@@ -76,7 +84,6 @@ function draw() {
   // draw what you're drawing right now
   drawEdits(currentEdits);
 
-  // display button/slider bar
   // display weight
   fill(color(currentEdits.color));
   for (var i = 0; i < weightAmount; i++) {
@@ -90,13 +97,16 @@ function draw() {
   if (ifInsideBox(weightBox)) {
     weightIndex = Math.round((mouseY - barTopOrBottom) / weightEachGap);
   }
+
   // display color
   noStroke();
+  var a = [];
   for (var i = 0; i < colorAmount; i++) {
     if (i == colorIndex) {
-      fill(toColor(i, 1));
+      var c = HEXtoRGB(colorArray[i]);
+      fill(color(c.r, c.g, c.b, 100));
     } else {
-      fill(toColor(i));
+      fill(colorArray[i]);
     }
     rect(width-barLeftOrRight*2, barTopOrBottom+colorEachGap*i, barLeftOrRight*2, colorEachGap);
   }
@@ -117,12 +127,12 @@ function ifInsideBox(box) {
 // built-in mouseReleased event handler
 function mouseReleased() {
 
-  // // for tetsing only
+  // for tetsing only
   // if (!ifJoinedRoomForTesting) {
-  //   join_room("test");
+  //   join_room("test", width, height);
   //   ifJoinedRoomForTesting = true;
   // }
-  //
+
   if (currentEdits.dots.length) {
 
     // allEdits.push(currentEdits);
@@ -137,9 +147,9 @@ function mouseReleased() {
 
 function touchEnded() {
 
-  // // for tetsing only
+  // for tetsing only
   // if (!ifJoinedRoomForTesting) {
-  //   join_room("test");
+  //   join_room("test", width, height);
   //   ifJoinedRoomForTesting = true;
   // }
 
@@ -191,7 +201,7 @@ function styleButton(button, posX, posY) {
 /*** other funcs ***/
 // draw from the array
 function drawEdits(edits) {
-  stroke(edits.color);
+  stroke(color(edits.color));
   strokeWeight(edits.weight);
   var dots = edits.dots;
   beginShape();
@@ -202,42 +212,55 @@ function drawEdits(edits) {
 }
 
 // using HSB now (convert decimal to hex)
-function toColor(d, s = 0.5) {
-    var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*s, MAX_COLOR_HSB);
-    return RGBtoHEX(c.r, c.g, c.b);
-    // return "#"+nf(Number(d).toString(16),6);
-}
+// function toColor(d, b = 1) {
+//     var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*0.7, MAX_COLOR_HSB * b);
+//     // return [c.r, c.g, c.b];
+//     return RGBtoHEX(c.r, c.g, c.b);
+//     // return "#"+nf(Number(d).toString(16),6);
+// }
 
-function HSVtoRGB(h, s, v) {
-    var r, g, b, i, f, p, q, t;
-    if (arguments.length === 1) {
-        s = h.s, v = h.v, h = h.h;
-    }
-    i = Math.floor(h * 6);
-    f = h * 6 - i;
-    p = v * (1 - s);
-    q = v * (1 - f * s);
-    t = v * (1 - (1 - f) * s);
-    switch (i % 6) {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
+// function HSVtoRGB(h, s, v) {
+//     var r, g, b, i, f, p, q, t;
+//     if (arguments.length === 1) {
+//         s = h.s, v = h.v, h = h.h;
+//     }
+//     i = Math.floor(h * 6);
+//     f = h * 6 - i;
+//     p = v * (1 - s);
+//     q = v * (1 - f * s);
+//     t = v * (1 - (1 - f) * s);
+//     switch (i % 6) {
+//         case 0: r = v, g = t, b = p; break;
+//         case 1: r = q, g = v, b = p; break;
+//         case 2: r = p, g = v, b = t; break;
+//         case 3: r = p, g = q, b = v; break;
+//         case 4: r = t, g = p, b = v; break;
+//         case 5: r = v, g = p, b = q; break;
+//     }
+//     return {
+//         r: Math.round(r * 255),
+//         g: Math.round(g * 255),
+//         b: Math.round(b * 255)
+//     };
+// }
+
+// function RGBtoHEX(r, g, b) {
+//     return  '#' + [r, g, b].map(x => {
+//       const hex = x.toString(16)
+//       return hex.length === 1 ? '0' + hex : hex
+//     }).join('')
+// }
+
+function HEXtoRGB(hex) {
+    var bigint = parseInt(hex.replace("#",""), 16);
+    var r = (bigint >> 16) & 255;
+    var g = (bigint >> 8) & 255;
+    var b = bigint & 255;
     return {
-        r: Math.round(r * 255),
-        g: Math.round(g * 255),
-        b: Math.round(b * 255)
+      "r": r,
+      "g": g,
+      "b": b
     };
-}
-
-function RGBtoHEX(r, g, b) {
-    return  '#' + [r, g, b].map(x => {
-      const hex = x.toString(16)
-      return hex.length === 1 ? '0' + hex : hex
-    }).join('')
 }
 
 /*** funcs dealing with socket/multi-users ***/
@@ -256,6 +279,10 @@ function initDraws(data) {
 // if other's drawn anything, update my "allEdits"
 function updateDraws(data) {
   allEdits.push(data.edits);
+}
+
+function test() {
+  bgColor = 255;
 }
 
 /*** funcs dealing with APP ***/
