@@ -27,9 +27,11 @@ var colorArray = ["#ff4d4d", "#ff824d", "#ffb84d", "#ffed4d", "#dbff4d"
                 , "#a64dff", "#db4dff", "#ff4ded", "#ff4db8", "#ff4d82"
                 , "#ffffff", "#000000"];
 var colorAmount = colorArray.length;
-var colorIndex = 0;
+var colorIndex = colorAmount-2;
 var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
+var leaveButton;
+var myRoom;
 // run once before draw()
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -44,19 +46,29 @@ function setup() {
   styleButton(clearButton, width*0.9, 20);
   clearButton.mousePressed(clearEvent);
 
+  // button - leave
+  leaveButton = createButton('FINISH PAINTING');
+  var leaveButtonWidth = width*0.3;
+  var leaveButtonHeight = height*0.02;
+  styleButton(leaveButton, width/2-leaveButtonWidth/2, height*0.95);
+  leaveButton.style("width", leaveButtonWidth+"px");
+  leaveButton.style("height", leaveButtonHeight+"px");
+  leaveButton.style("background", "#fff");
+  leaveButton.mousePressed(leaveEvent);
   barTopOrBottom = height * 0.2;
   barLeftOrRight = width * 0.05;
   weightEachGap = (height-barTopOrBottom*2) / (weightAmount-1);
   colorEachGap = (height-barTopOrBottom*2) / (colorAmount-1);
   weightBox = {left: 0, right: barLeftOrRight, top: barTopOrBottom, bottom: height-barTopOrBottom};
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
-
 }
+
+var bgColor = 51;
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
   if (deviceOrientation) text(deviceOrientation, width/2, height/2);
-  background(51);
+  background(bgColor);
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -181,6 +193,12 @@ function clearEvent() {
   allEdits = [];
 }
 
+// click "FINISH": delete everything in "allEdits"
+function leaveEvent() {
+  console.log("I am leaving now");
+  leave_room(myRoom);
+}
+
 /*** init funcs ***/
 function initCurrentEdits() {
   currentEdits = {
@@ -209,46 +227,6 @@ function drawEdits(edits) {
   }
   endShape();
 }
-
-// using HSB now (convert decimal to hex)
-// function toColor(d, b = 1) {
-//     var c = HSVtoRGB(d/colorAmount*MAX_COLOR_HSB, MAX_COLOR_HSB*0.7, MAX_COLOR_HSB * b);
-//     // return [c.r, c.g, c.b];
-//     return RGBtoHEX(c.r, c.g, c.b);
-//     // return "#"+nf(Number(d).toString(16),6);
-// }
-
-// function HSVtoRGB(h, s, v) {
-//     var r, g, b, i, f, p, q, t;
-//     if (arguments.length === 1) {
-//         s = h.s, v = h.v, h = h.h;
-//     }
-//     i = Math.floor(h * 6);
-//     f = h * 6 - i;
-//     p = v * (1 - s);
-//     q = v * (1 - f * s);
-//     t = v * (1 - (1 - f) * s);
-//     switch (i % 6) {
-//         case 0: r = v, g = t, b = p; break;
-//         case 1: r = q, g = v, b = p; break;
-//         case 2: r = p, g = v, b = t; break;
-//         case 3: r = p, g = q, b = v; break;
-//         case 4: r = t, g = p, b = v; break;
-//         case 5: r = v, g = p, b = q; break;
-//     }
-//     return {
-//         r: Math.round(r * 255),
-//         g: Math.round(g * 255),
-//         b: Math.round(b * 255)
-//     };
-// }
-
-// function RGBtoHEX(r, g, b) {
-//     return  '#' + [r, g, b].map(x => {
-//       const hex = x.toString(16)
-//       return hex.length === 1 ? '0' + hex : hex
-//     }).join('')
-// }
 
 function HEXtoRGB(hex) {
     var bigint = parseInt(hex.replace("#",""), 16);
@@ -280,8 +258,13 @@ function updateDraws(data) {
   allEdits.push(data.edits);
 }
 
+function test() {
+  bgColor = 255;
+}
+
 /*** funcs dealing with APP ***/
 function receiveQrAndDimensions(qr, width, height) {
-  console.log(qr + ", " + width + ", " + height);
-  join_room(qr, width, height);
+  myRoom = qr;
+  console.log(myRoom + ", " + width + ", " + height);
+  join_room(myRoom, width, height);
 }

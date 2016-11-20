@@ -41,6 +41,12 @@ $(function () {
     socket.on('draw_stroke', draw_stroke);
     socket.on('leaved_room', leaved_room);
     socket.on('joined_room', joined_room);
+
+    var room = $('body').data('room');
+    var width = $('width').data('width');
+    var height = $('height').data('height');
+
+    join_room(room, width, height);
 });
 
 
