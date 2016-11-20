@@ -32,6 +32,8 @@ var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 var leaveButton;
 var bg;
+var IfBgLoaded = false;
+var isInAnyRoom = true;
 // run once before draw()
 function setup() {
   var canvas = createCanvas(windowWidth, windowHeight);
@@ -62,7 +64,7 @@ function setup() {
   weightBox = {left: 0, right: barLeftOrRight, top: barTopOrBottom, bottom: height-barTopOrBottom};
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 }
-var IfBgLoaded = false;
+
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
@@ -90,7 +92,8 @@ function draw() {
   // else, push current coordinates to "currentEdits"
   var edit;
   // if (mouseX != pmouseX && mouseY != pmouseY) {
-  if ((touchIsDown || mouseIsPressed)
+  if (isInAnyRoom
+    && (touchIsDown || mouseIsPressed)
     && !ifInsideBox(colorBox)
     && !ifInsideBox(weightBox)) {
     edit = {
@@ -204,6 +207,7 @@ function clearEvent() {
 function leaveEvent() {
   console.log("I am leaving now");
   leave_room(socket.room);
+  isInAnyRoom = false;
 }
 
 /*** init funcs ***/
