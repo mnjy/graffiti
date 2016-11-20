@@ -21,35 +21,48 @@ var allEdits = [];
 var currentEdits = {};
 var weightSlider, colorSlider, undoButton, clearButton;
 var buttonAreasBottomY = 40;
-
+var colorSliderX, colorSliderY, colorSliderWidth;
+var weightSliderX, weightSliderY, weightSliderWidth;
+var weightMax = 40;
+var weightAmount = 15;
+var MAX_COLOR = 16777215;
+var colorAmount = 20;
 // run once before draw()
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  var canvas = createCanvas(displayWidth, displayHeight);
+  // Move the canvas so it's inside <div id="sketch-holder">.
+  // canvas.parent('sketch-holder');
+  // var x = (windowWidth - width) / 2;
+  // var y = (windowHeight - height) / 2;
+  // canvas.position(x, y);
+
   // init the object containing current edits info
   initCurrentEdits();
   // slider used to change stroke weight
-  weightSlider = createSlider(1, 40, 1);
-  styleSlider(weightSlider, 0, 10, windowWidth*0.4);
+  weightSlider = createSlider(0, weightMax, 10, weightMax / weightAmount);
   // slider used to change stroke color
-  colorSlider = createSlider(0, 16777215, 1);
-  styleSlider(colorSlider, windowWidth*0.45, 10, windowWidth*0.4);
+  colorSlider = createSlider(0, colorAmount, 0, 1);
   // button - undo
   undoButton = createButton('undo');
-  styleButton(undoButton, windowWidth*0.9, 0);
+  styleButton(undoButton, displayWidth*0.9, 0);
   undoButton.mousePressed(undoEvent);
   // button - clear
   clearButton = createButton('clear');
-  styleButton(clearButton, windowWidth*0.9, 20);
+  styleButton(clearButton, displayWidth*0.9, 20);
   clearButton.mousePressed(clearEvent);
 }
 
 // run forever
 function draw() {
+  weightSliderX = 10;
+  weightSliderY = 10;
+  weightSliderWidth = width*0.4;
+
+  colorSliderX = width*0.45;
+  colorSliderY = 10;
+  colorSliderWidth = width*0.4;
+
   background(51);
-  fill(255);
-  noStroke();
-  rect(0, 0, windowWidth, buttonAreasBottomY);
-  noFill();
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -57,7 +70,7 @@ function draw() {
   }
 
   // set color and weight
-  currentEdits.color = toHexColor(colorSlider.value());
+  currentEdits.color = toHexColor(int(colorSlider.value() / colorAmount * MAX_COLOR));
   currentEdits.weight = weightSlider.value();
   // if mouse has not been moved, do nothing
   // else, push current coordinates to "currentEdits"
@@ -74,6 +87,36 @@ function draw() {
   }
   // draw what you're drawing right now
   drawEdits(currentEdits);
+
+  // display button/slider bar
+  fill(255);
+  noStroke();
+  rect(0, 0, width, buttonAreasBottomY);
+
+  // display weight
+  var wightEachWidth = weightSliderWidth / weightAmount;
+  fill(color(currentEdits.color));
+  for (var i = 0; i <= weightAmount; i++) {
+    var myX = weightSliderX + i * weightSliderWidth / weightAmount;
+    ellipse(myX, weightSliderY*2, i / weightAmount * weightMax);
+  }
+  styleSlider(weightSlider, weightSliderX, weightSliderY, weightSliderWidth);
+
+  // display color
+  fill(100);
+  strokeWeight(1);
+  var colorPickerBottom = colorSliderY*4;
+  var colorEachWidth = colorSliderWidth / colorAmount;
+  for (var i = 0; i < colorAmount; i++) {
+    var myX = colorSliderX + i * colorSliderWidth / colorAmount;
+
+    fill(color(toHexColor(int(i/colorAmount*MAX_COLOR))));
+    rect(myX, 0, colorEachWidth, colorPickerBottom);
+
+  }
+  // rect(colorSliderX, 0, colorSliderWidth, colorSliderY*4);
+  styleSlider(colorSlider, colorSliderX, colorSliderY, colorSliderWidth);
+  noFill();
 }
 
 /*** event handler funcs ***/
@@ -170,4 +213,9 @@ function initDraws(data) {
 // if other's drawn anything, update my "allEdits"
 function updateDraws(data) {
   allEdits.push(data.edits);
+}
+
+/*** funcs dealing with APP ***/
+function receiveQrAndDimensions(qr, width, height) {
+  console.log(qr + ", " + width + ", " + height);
 }
