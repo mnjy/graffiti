@@ -27,7 +27,7 @@ var colorArray = ["#ff4d4d", "#ff824d", "#ffb84d", "#ffed4d", "#dbff4d"
                 , "#a64dff", "#db4dff", "#ff4ded", "#ff4db8", "#ff4d82"
                 , "#ffffff", "#000000"];
 var colorAmount = colorArray.length;
-var colorIndex = 0;
+var colorIndex = colorAmount-2;
 var weightIndex = 0;
 var barTopOrBottom, barLeftOrRight, weightEachGap, colorEachGap, weightBox, colorBox;
 // run once before draw()
@@ -52,11 +52,12 @@ function setup() {
   colorBox = {left: width-barLeftOrRight*2, right: width, top: barTopOrBottom, bottom: height-barTopOrBottom};
 
 }
+var bgColor = 51;
 // var ifJoinedRoomForTesting = false;
 // run forever
 function draw() {
   if (deviceOrientation) text(deviceOrientation, width/2, height/2);
-  background(51);
+  background(bgColor);
 
   // keep what you've drawn on the canvas
   for (var i = 0; i < allEdits.length; i++) {
@@ -278,6 +279,10 @@ function initDraws(data) {
 // if other's drawn anything, update my "allEdits"
 function updateDraws(data) {
   allEdits.push(data.edits);
+}
+
+function test() {
+  bgColor = 255;
 }
 
 /*** funcs dealing with APP ***/
