@@ -203,7 +203,7 @@ function clearEvent() {
 // click "FINISH": delete everything in "allEdits"
 function leaveEvent() {
   console.log("I am leaving now");
-  leave_room(myRoom);
+  leave_room(socket.room);
 }
 
 /*** init funcs ***/
