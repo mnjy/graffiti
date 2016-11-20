@@ -15,8 +15,7 @@ function joined_room(data) {
 }
 
 function draw_stroke(data) {
-    console.log(data);
-
+    updateDraws(data);
 }
 
 ////////////////
