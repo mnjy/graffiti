@@ -29,6 +29,7 @@ app.set('port', port);
 var server = http.createServer(app);
 
 var io = socket(server);
+io.images = {};
 io.on('connection', connection);
 
 /**
