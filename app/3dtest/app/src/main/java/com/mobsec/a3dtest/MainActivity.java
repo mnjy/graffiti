@@ -121,22 +121,23 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     @Override
     protected void onResume() {
         super.onResume();
-//        if (currentViewState == VIEW_STATE.QR_SCANNER) {
-//        mQRView.startCamera();
-//        }
+        if (currentViewState == VIEW_STATE.QR_SCANNER) {
+            mQRView.startCamera();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        if (currentViewState == VIEW_STATE.QR_SCANNER) {
-//        mQRView.stopCamera();
-//        }
+        if (currentViewState == VIEW_STATE.QR_SCANNER) {
+            mQRView.stopCamera();
+        }
     }
 
-    private String qr;
-    private int width;
-    private int height;
+    //defaults
+    private String qr = "graffiti";
+    private int width = 256;
+    private int height = 256;
 
     // Called when a QR is decoded
     // "text" : the text encoded in QR
@@ -157,9 +158,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
         if (bmp != null) {
             width = bmp.getWidth();
             height = bmp.getHeight();
-        } else { //use some defaults
-            width = 256;
-            height = 480;
         }
 
         //Render the object
@@ -189,7 +187,11 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     }
 
     public void destroyARObject(){
-        ((ViewGroup) surface.getParent()).removeView(surface);
+        if (surface != null) {
+            ((ViewGroup) surface.getParent()).removeView(surface);
+            surface = null;
+        }
+
     }
 
     public void createCamera() {
@@ -210,11 +212,28 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
 //        }
     }
 
+    public void createQRScanner(){
+        mQRView = new QRCodeReaderView(this);
+        mQRView.setOnQRCodeReadListener(this);
+        mQRView.setQRDecodingEnabled(true);
+        mQRView.setBackCamera();
+
+        addContentView(mQRView, new ActionBar.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT));
+    }
+
+    public void destroyQRScanner(){
+        if (mQRView != null) {
+            mQRView.setQRDecodingEnabled(false);
+            ((ViewGroup) mQRView.getParent()).removeView(mQRView);
+            mQRView = null;
+        }
+    }
+
     public void startDrawing(){
         switchToView(VIEW_STATE.WEB_VIEW);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setDomStorageEnabled(true);
-        mWebView.getSettings().setUseWideViewPort(false);
+        mWebView.getSettings().setUseWideViewPort(true);
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -222,7 +241,6 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 return false;
             }
         });
-        qr = "A";
         mWebView.loadUrl(webViewUrl+"/draw/"+qr+"/"+width+"/"+height);
     }
 
@@ -245,14 +263,16 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
     private void switchToView(VIEW_STATE view){
         switch (view){
             case QR_SCANNER:
+                createQRScanner();
 //                mQRView.setVisibility(VISIBLE);
                 mView.setVisibility(GONE);
                 mWebView.setVisibility(GONE);
-//                mQRView.startCamera();
+                mQRView.startCamera();
                 destroyCamera();
                 currentViewState = VIEW_STATE.QR_SCANNER;
                 break;
             case SURFACE:
+                destroyQRScanner();
 //                mQRView.setVisibility(GONE);
                 mView.setVisibility(VISIBLE);
                 mWebView.setVisibility(GONE);
@@ -262,6 +282,7 @@ public class MainActivity extends AppCompatActivity implements SurfaceHolder.Cal
                 currentViewState = VIEW_STATE.SURFACE;
                 break;
             case WEB_VIEW:
+                destroyQRScanner();
 //                mQRView.setVisibility(GONE);
                 mView.setVisibility(GONE);
                 mWebView.setVisibility(VISIBLE);
